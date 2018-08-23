@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const _ = require('underscore');
 const counter = require('./counter');
+const Promise = require('bluebird');
 
 // var items = {};
 
@@ -41,17 +42,17 @@ exports.readAll = (callback) => {
         let newData = [];
 
         console.log(files)
+
         files.forEach((file) => {
           fs.readFile(path.join(exports.dataDir,file), (err, chunk) => {
-            let text = []
-            text.push(chunk)
-            console.log(file, Buffer.concat(text).toString());
+            // console.log('file ',file, chunk.toString());
             let fileId = file.slice(0,5);
-            newData.push({id: fileId, text: Buffer.concat(text).toString()})
+            newData.push({id: fileId, text: chunk.toString()})
+            console.log('this is the data with objects', newData)
             data = newData
           })
         })
-        console.log('this is the data with objects', newData)
+        console.log('this is the data with objects 2', newData)
         callback (null, newData);
       }
     }
@@ -71,11 +72,8 @@ exports.readOne = (id, callback) => {
     //error-first callback pattern initiate - node.js standard practice
     var text= []
     if (err) {
-      // console.log('this is id! ', `${id}`)
-      // console.log('error callback!',err)
       callback(err);
     } else {
-      // console.log(Buffer.concat(ar).toString())
       if (!results) {
         console.log('no result found')
         callback(new Error(`No item with id: ${id}`));
