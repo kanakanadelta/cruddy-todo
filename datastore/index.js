@@ -22,12 +22,12 @@ exports.create = (text, callback) => {
 //   }
 
   counter.getNextUniqueId((err, id) => {
-    let item = text
+    // let item = text
 
     console.log(id)
-    fs.writeFile(__dirname + `/data/${id}.txt`, text, (err) => {
+    fs.writeFile(path.join(exports.dataDir,`${id}.txt`), text, (err) => {
       if (err) throw err;
-        console.log('success');
+        console.log(text);
       }
     );
     callback(id);
@@ -36,11 +36,11 @@ exports.create = (text, callback) => {
 };
 
 exports.readAll = (callback) => {
-  var data = [];
-  _.each(items, (item, idx) => {
-    data.push({ id: idx, text: items[idx] });
-  });
-  callback(null, data);
+  // var data = [];
+  // _.each(items, (item, idx) => {
+  //   data.push({ id: idx, text: items[idx] });
+  // });
+  // callback(null, data);
 
   //iterate through our data folder / "todo list"
     //retrieve length?
