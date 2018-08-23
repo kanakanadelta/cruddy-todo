@@ -3,7 +3,7 @@ const path = require('path');
 const _ = require('underscore');
 const counter = require('./counter');
 
-var items = {};
+// var items = {};
 
 // Public API - Fix these CRUD functions ///////////////////////////////////////
 
@@ -22,33 +22,71 @@ exports.create = (text, callback) => {
   });
 };
 
+
+exports.readAll = (callback) => {
+  var data = [];
+  // _.each(items, (item, idx) => {
+  //   data.push({ id: idx, text: items[idx] });
+  // });
+  // callback(null, data);
+  
+  fs.readdir(exports.dataDir, (err, files) =>{
+    if (err) {
+      callback(err);
+    } else {
+      if(!files.length) {
+        callback(null, data);
+      } else if (files.length) {
+
+        let newData = [];
+
+        console.log(files)
+        files.forEach((file) => {
+          fs.readFile(path.join(exports.dataDir,file), (err, chunk) => {
+            let text = []
+            text.push(chunk)
+            console.log(file, Buffer.concat(text).toString());
+            let fileId = file.slice(0,5);
+            newData.push({id: fileId, text: Buffer.concat(text).toString()})
+            data = newData
+          })
+        })
+        console.log('this is the data with objects', newData)
+        callback (null, newData);
+      }
+    }
+  })
+
+  //iterate through our data folder / "todo list"
+  //retrieve length?
+
+};
+
 //check if todo-item is written in the directory it is looking for
 exports.readOne = (id, callback) => {
   //no longer using the items object, instead use DataDir
   // var item = items[id];
 
-  fs.readFile(path.join(exports.dataDir,`${id}.txt`), text, (err) => {
+  fs.readFile(path.join(exports.dataDir,`/`,`${id}`), (err, results) => {
     //error-first callback pattern initiate - node.js standard practice
+    var text= []
     if (err) {
+      // console.log('this is id! ', `${id}`)
+      // console.log('error callback!',err)
       callback(err);
-    } else if (!item) {
-      callback(new Error(`No item with id: ${id}`));
     } else {
-      callback(null, {id: id, text: item});
+      // console.log(Buffer.concat(ar).toString())
+      if (!results) {
+        console.log('no result found')
+        callback(new Error(`No item with id: ${id}`));
+      } else {
+        text.push(results);
+        text = Buffer.concat(text).toString()
+        console.log({id: id, text: text})
+        callback(null, {id: id, text: text});
+      }
     }
   })
-};
-
-exports.readAll = (callback) => {
-  var data = [];
-  _.each(items, (item, idx) => {
-    data.push({ id: idx, text: items[idx] });
-  });
-  callback(null, data);
-
-  //iterate through our data folder / "todo list"
-    //retrieve length?
-
 };
 
 exports.update = (id, text, callback) => {
