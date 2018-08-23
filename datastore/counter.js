@@ -1,3 +1,5 @@
+// import { write } from 'fs';
+
 const fs = require('fs');
 const path = require('path');
 const sprintf = require('sprintf-js').sprintf;
@@ -38,8 +40,24 @@ const writeCounter = (count, callback) => {
 
 // Public API - Fix this function //////////////////////////////////////////////
 
-exports.getNextUniqueId = () => {
-  counter = counter + 1;
+exports.getNextUniqueId = (callback) => {
+  // readCounter takes in a callback   
+  //check for errors if callback is falsy-ish
+  readCounter((err, count) => {
+    if(err){
+      callback(err);
+    } else {
+      // update the counter.txt with the incremented count
+      writeCounter(count+1, (err, newId) => {
+        if(err){
+          callback(err);
+        } else {
+          //callback handles returning data to what calls this func
+          callback(err, newId);
+        }
+      })
+    }
+  });
   return zeroPaddedNumber(counter);
 };
 

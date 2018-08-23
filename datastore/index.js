@@ -3,23 +3,36 @@ const path = require('path');
 const _ = require('underscore');
 const counter = require('./counter');
 
-var items = {};
+// var items = {};
 
 // Public API - Fix these CRUD functions ///////////////////////////////////////
 
 exports.create = (text, callback) => {
-  var id = counter.getNextUniqueId();
-  items[id] = text;
-  callback(null, {id: id, text: text});
-};
+//   var id = counter.getNextUniqueId();
+//   items[id] = text;
+//   callback(null, {id: id, text: text});
+// };
 
-exports.readOne = (id, callback) => {
-  var item = items[id];
-  if (!item) {
-    callback(new Error(`No item with id: ${id}`));
-  } else {
-    callback(null, {id: id, text: item});
-  }
+// exports.readOne = (id, callback) => {
+//   var item = items[id];
+//   if (!item) {
+//     callback(new Error(`No item with id: ${id}`));
+//   } else {
+//     callback(null, {id: id, text: item});
+//   }
+
+  counter.getNextUniqueId((err, id) => {
+    let item = text
+
+    console.log(id)
+    fs.writeFile(__dirname + `/data/${id}.txt`, text, (err) => {
+      if (err) throw err;
+        console.log('success');
+      }
+    );
+    callback(id);
+  });
+  // callback(null, {id: id, text: item});
 };
 
 exports.readAll = (callback) => {
@@ -28,6 +41,10 @@ exports.readAll = (callback) => {
     data.push({ id: idx, text: items[idx] });
   });
   callback(null, data);
+
+  //iterate through our data folder / "todo list"
+    //retrieve length?
+
 };
 
 exports.update = (id, text, callback) => {

@@ -73,6 +73,7 @@ describe('todos', () => {
         expect(todoCount).to.equal(1);
         todos.create('todo2', (err, data) => {
           expect(fs.readdirSync(todos.dataDir)).to.have.lengthOf(2);
+          console.log(dataDir)
           done();
         });
       });
