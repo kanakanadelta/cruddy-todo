@@ -3,7 +3,7 @@ const path = require('path');
 const _ = require('underscore');
 const counter = require('./counter');
 
-// var items = {};
+var items = {};
 
 // Public API - Fix these CRUD functions ///////////////////////////////////////
 
@@ -22,17 +22,16 @@ exports.create = (text, callback) => {
 //   }
 
   counter.getNextUniqueId((err, id) => {
-    // let item = text
 
     console.log(id)
     fs.writeFile(path.join(exports.dataDir,`${id}.txt`), text, (err) => {
-      if (err) throw err;
-        console.log(text);
-      }
-    );
-    callback(id);
+      if (err) {
+        callback(err);
+      } else {
+        callback(null, {id: id, text: text});
+      }   
+    });
   });
-  // callback(null, {id: id, text: item});
 };
 
 exports.readAll = (callback) => {
