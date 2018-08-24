@@ -3,9 +3,9 @@ const path = require('path');
 const _ = require('underscore');
 const counter = require('./counter');
 //promise consts
-// const Promise = require('bluebird');
+const Promise = require('bluebird');
 ////promise////
-// const readFilePromise = Promise.promisify(fs.readFile);
+const readFilePromise = Promise.promisify(fs.readFile);
 //promiseEnd//
 
 
@@ -28,7 +28,6 @@ exports.create = (text, callback) => {
   // });
 
   //Promise Refactor//
-
   counter.getNextUniqueId((err, id) => {
 
     var promise = function() {
@@ -147,7 +146,7 @@ exports.update = (id, text, callback) => {
         if (err) {
           callback(err);
         } else {
-          setTimeout(callback(null, {id: id, text: text}), 0);
+          callback(null, {id: id, text: text});
         }
       });
     }
@@ -155,14 +154,20 @@ exports.update = (id, text, callback) => {
 };
 
 exports.delete = (id, callback) => {
-  var item = items[id];
-  delete items[id];
-  if(!item) {
-    // report an error if item not found
-    callback(new Error(`No item with id: ${id}`));
-  } else {
-    callback();
-  }
+//   var item = items[id];
+//   delete items[id];
+//   if(!item) {
+//     // report an error if item not found
+//     callback(new Error(`No item with id: ${id}`));
+//   } else {
+//     callback();
+//   }
+
+//Asynchronously removes a file or symbolic link. 
+//No arguments other than a possible exception are given to the completion callback.
+  fs.unlink(path.join(exports.dataDir,`/`,`${id}.txt`), (err) => {
+      callback(err);
+  });
 };
 
 // Config+Initialization code -- DO NOT MODIFY /////////////////////////////////
