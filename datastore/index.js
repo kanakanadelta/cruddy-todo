@@ -35,21 +35,21 @@ exports.create = (text, callback) => {
       return new Promise(function(res, rej){
         fs.writeFile(path.join(exports.dataDir,`${id}.txt`), text, (err) => {
         //error-first callback pattern initiate - node.js standard practice
-        if (err) {
-          rej(err);
-        } else {
-          res(id, text);
-          // callback(null, {id: id, text: text});
-        }
+          if (err) {
+            rej(err);
+          } else {
+            res(id, text);
+          }
         });
       });
     }
     promise()
       .then(function(res) {
+        // console.log(res, {id: id, text: text})
         callback(null, {id: id, text: text});
       })
       .catch(function(err) {
-        throw 'error'
+        throw 'error';
       })
   });
 
@@ -94,19 +94,37 @@ exports.readOne = (id, callback) => {
   //no longer using the items object, instead use DataDir
   // var item = items[id];
 
-  fs.readFile(path.join(exports.dataDir,`/`,`${id}`), (err, results) => {
+  fs.readFile(`${exports.dataDir}/${id}.txt`, 'utf8',(err, results) => {
     //error-first callback pattern initiate - node.js standard practice
-    if (err) {
-      callback(err);
-    } else {
-      if (!results) {
-        console.log('no result found')
+      if (err) {
         callback(new Error(`No item with id: ${id}`));
       } else {
-        callback(null, {id: id, text: results.toString()});
+        callback(null, {id: id, text: results});
       }
-    }
   })
+
+  //Promise re-factor:
+  // var promise = function() {
+  //   return new Promise(function(res, rej){
+  //     fs.readFile(path.join(exports.dataDir,`/`,`${id}.txt`), 'utf8', (err, results) => {
+  //       //error-first callback pattern initiate - node.js standard practice
+  //       if (err) {
+  //         rej(err);
+  //       } else {
+  //         res(results);
+  //       }
+  //     })
+  //   })
+  // }
+  // promise()
+  //   .then(function(res){
+  //     console.log('resolved!')
+  //     callback(null, {id: id, text: results})
+  //   })
+  //   .catch(function(rej){
+  //     throw 'error at readOne';
+  //   })
+
 };
 
 exports.update = (id, text, callback) => {
@@ -119,7 +137,7 @@ exports.update = (id, text, callback) => {
   //   callback(null, {id: id, text: text});
   // }
 
-  fs.readFile(path.join(exports.dataDir,`/`,`${id}`), (err, results) => {
+  fs.readFile(path.join(exports.dataDir,`/`,`${id}.txt`), (err, results) => {
     if (err) {
       callback(err);
     } else if (!id) {
