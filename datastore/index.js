@@ -56,36 +56,59 @@ exports.create = (text, callback) => {
 
 
 exports.readAll = (callback) => {
-  var data = [];
+  // var data = [];
   // _.each(items, (item, idx) => {
   //   data.push({ id: idx, text: items[idx] });
   // });
   // callback(null, data);
   
+  // fs.readdir(exports.dataDir, (err, files) =>{
+  //   if (err) {
+  //     callback(err);
+  //   } else {
+  //     if(!files.length) {
+  //       callback(null, data);
+  //     } else if (files.length) {
+
+  //       files.forEach((file) => {
+  //         fs.readFile(path.join(exports.dataDir,file), (err, chunk) => {
+  //           // console.log('file ',file, chunk.toString());
+  //           let fileId = path.basename(file, '.txt')
+  //           data.push({id: fileId, text: chunk.toString()})
+  //           console.log('this is the data with objects', data)
+  //         })
+  //       })
+  //       console.log('this is the data with objects 2', data)
+  //       callback (null, data);
+  //     }
+  //   }
+  // })
+
+  // Promise refactor:
   fs.readdir(exports.dataDir, (err, files) =>{
     if (err) {
       callback(err);
-    } else {
-      if(!files.length) {
-        callback(null, data);
-      } else if (files.length) {
-
-        files.forEach((file) => {
-          fs.readFile(path.join(exports.dataDir,file), (err, chunk) => {
-            // console.log('file ',file, chunk.toString());
-            let fileId = file.slice(0,5);
-            data.push({id: fileId, text: chunk.toString()})
-            console.log('this is the data with objects', data)
-          })
-        })
-        console.log('this is the data with objects 2', data)
-        setTimeout(callback (null, data), 0);
-      }
     }
-  })
-  //iterate through our data folder / "todo list"
-  //retrieve length?
-  
+    //map through the files, and make new data array to return
+    var data = _.map(files, (file) => {
+      //assigning id to be padded number without the txt filename
+      var id = path.basename(file, '.txt');
+      var filePath = path.join(exports.dataDir, file);
+
+      return readFilePromise(filePath)
+        .then( (fileData) => {
+          return { id: id, text: fileData.toString()}
+        })
+    });
+
+    Promise.all(data)
+      .then(function(promisedFiles) {
+        callback(null, promisedFiles);
+      })
+      .catch(function(err) {
+        throw 'error';
+      })
+  });
 };
 
 //check if todo-item is written in the directory it is looking for
