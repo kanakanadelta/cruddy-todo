@@ -3,9 +3,9 @@ const path = require('path');
 const _ = require('underscore');
 const counter = require('./counter');
 //promise consts
-const Promise = require('bluebird');
+// const Promise = require('bluebird');
 ////promise////
-const readFilePromise = Promise.promisify(fs.readFile);
+// const readFilePromise = Promise.promisify(fs.readFile);
 //promiseEnd//
 
 
@@ -15,17 +15,44 @@ const readFilePromise = Promise.promisify(fs.readFile);
 
 exports.create = (text, callback) => {
   //invoke getNextUniqueId to retrieve id from counter
+  // counter.getNextUniqueId((err, id) => {
+  //   //since we are in scope, we are able to get the id, and write a new file with given padded id.
+  //   fs.writeFile(path.join(exports.dataDir,`${id}.txt`), text, (err) => {
+  //     //error-first callback pattern initiate - node.js standard practice
+  //     if (err) {
+  //       callback(err);
+  //     } else {
+  //       callback(null, {id: id, text: text});
+  //     }
+  //   });
+  // });
+
+  //Promise Refactor//
+
   counter.getNextUniqueId((err, id) => {
-    //since we are in scope, we are able to get the id, and write a new file with given padded id.
-    fs.writeFile(path.join(exports.dataDir,`${id}.txt`), text, (err) => {
-      //error-first callback pattern initiate - node.js standard practice
-      if (err) {
-        callback(err);
-      } else {
+
+    var promise = function() {
+      return new Promise(function(res, rej){
+        fs.writeFile(path.join(exports.dataDir,`${id}.txt`), text, (err) => {
+        //error-first callback pattern initiate - node.js standard practice
+        if (err) {
+          rej(err);
+        } else {
+          res(id, text);
+          // callback(null, {id: id, text: text});
+        }
+        });
+      });
+    }
+    promise()
+      .then(function(res) {
         callback(null, {id: id, text: text});
-      }
-    });
+      })
+      .catch(function(err) {
+        throw 'error'
+      })
   });
+
 };
 
 
@@ -44,28 +71,22 @@ exports.readAll = (callback) => {
         callback(null, data);
       } else if (files.length) {
 
-        let newData = [];
-
-        console.log(files)
-
         files.forEach((file) => {
           fs.readFile(path.join(exports.dataDir,file), (err, chunk) => {
             // console.log('file ',file, chunk.toString());
             let fileId = file.slice(0,5);
-            newData.push({id: fileId, text: chunk.toString()})
-            console.log('this is the data with objects', newData)
-            data = newData
+            data.push({id: fileId, text: chunk.toString()})
+            console.log('this is the data with objects', data)
           })
         })
-        console.log('this is the data with objects 2', newData)
-        callback (null, newData);
+        console.log('this is the data with objects 2', data)
+        setTimeout(callback (null, data), 0);
       }
     }
   })
-
   //iterate through our data folder / "todo list"
   //retrieve length?
-
+  
 };
 
 //check if todo-item is written in the directory it is looking for
@@ -108,7 +129,7 @@ exports.update = (id, text, callback) => {
         if (err) {
           callback(err);
         } else {
-          callback(null, {id: id, text: text});
+          setTimeout(callback(null, {id: id, text: text}), 0);
         }
       });
     }
