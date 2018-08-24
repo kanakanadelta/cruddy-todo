@@ -2,7 +2,12 @@ const fs = require('fs');
 const path = require('path');
 const _ = require('underscore');
 const counter = require('./counter');
+//promise consts
 const Promise = require('bluebird');
+////promise////
+const readFilePromise = Promise.promisify(fs.readFile);
+//promiseEnd//
+
 
 // var items = {};
 
@@ -70,7 +75,6 @@ exports.readOne = (id, callback) => {
 
   fs.readFile(path.join(exports.dataDir,`/`,`${id}`), (err, results) => {
     //error-first callback pattern initiate - node.js standard practice
-    var text= []
     if (err) {
       callback(err);
     } else {
@@ -78,23 +82,37 @@ exports.readOne = (id, callback) => {
         console.log('no result found')
         callback(new Error(`No item with id: ${id}`));
       } else {
-        text.push(results);
-        text = Buffer.concat(text).toString()
-        console.log({id: id, text: text})
-        callback(null, {id: id, text: text});
+        callback(null, {id: id, text: results.toString()});
       }
     }
   })
 };
 
 exports.update = (id, text, callback) => {
-  var item = items[id];
-  if (!item) {
-    callback(new Error(`No item with id: ${id}`));
-  } else {
-    items[id] = text;
-    callback(null, {id: id, text: text});
-  }
+  // var item = items[id];
+
+  // if (!item) {
+  //   callback(new Error(`No item with id: ${id}`));
+  // } else {
+  //   items[id] = text;
+  //   callback(null, {id: id, text: text});
+  // }
+
+  fs.readFile(path.join(exports.dataDir,`/`,`${id}`), (err, results) => {
+    if (err) {
+      callback(err);
+    } else if (!id) {
+      callback(new Error(`No item with id: ${id}`));
+    } else {
+      fs.writeFile(path.join(exports.dataDir,`${id}.txt`), text, (err) => {
+        if (err) {
+          callback(err);
+        } else {
+          callback(null, {id: id, text: text});
+        }
+      });
+    }
+  })
 };
 
 exports.delete = (id, callback) => {
@@ -102,7 +120,7 @@ exports.delete = (id, callback) => {
   delete items[id];
   if(!item) {
     // report an error if item not found
-    callback(new Error(`No item with id: ${id}`))
+    callback(new Error(`No item with id: ${id}`));
   } else {
     callback();
   }
